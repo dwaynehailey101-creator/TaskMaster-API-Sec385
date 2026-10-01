@@ -1,13 +1,15 @@
 version: "3"
 services:
   nodeapi:
-    build: .
-    command: node app.js
+    build:
+      context: .
+      dockerfile: Dockerfile.node
     ports:
       - "8080:8080"
 
   pythonapi:
-    build: .
-    command: python api.py
+    build:
+      context: .
+      dockerfile: Dockerfile.python
     ports:
       - "5000:5000"
