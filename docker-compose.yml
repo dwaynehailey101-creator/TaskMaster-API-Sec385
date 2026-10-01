@@ -1,0 +1,13 @@
+version: "3"
+services:
+  nodeapi:
+    build: .
+    command: node app.js
+    ports:
+      - "8080:8080"
+
+  pythonapi:
+    build: .
+    command: python api.py
+    ports:
+      - "5000:5000"
