@@ -1,0 +1,48 @@
+name: DevSecOps Security Delivery Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  supply-chain-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Run Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'TaskMaster-API'
+          path: '.'
+
+      - name: Run Snyk Open Source
+        uses: snyk/actions/node@master
+        with:
+          command: test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  dast-runtime-verification:
+    needs: supply-chain-analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build and run Docker Compose
+        run: |
+          docker-compose up -d --build
+
+      - name: OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:8080'
